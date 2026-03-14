@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permintaan Maaf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --fg: #f5f0e8;
+            --muted: #8b7355;
+            --accent: #c9a86c;
+            --accent-light: #e8d4a8;
+            --card: rgba(20, 18, 25, 0.85);
+            --border: rgba(201, 168, 108, 0.3);
+            --burgundy: #5c1a1a;
+            --deep-red: #8b2635;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Lobby Screen */
+        .lobby-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .lobby-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+
+        .lobby-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: floatOrb 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--burgundy), transparent 70%);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--accent), transparent 70%);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -5s;
+            opacity: 0.5;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, var(--deep-red), transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -10s;
+            opacity: 0.4;
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -30px) scale(1.1); }
+            50% { transform: translate(-30px, 50px) scale(0.9); }
+            75% { transform: translate(40px, 40px) scale(1.05); }
+        }
+
+        .particle-field {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: particleRise 15s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes particleRise {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 10;
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            animation: cardEntrance 1s ease-out;
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--fg), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-subtitle {
+            color: var(--muted);
+            font-size: 1rem;
+            margin-bottom: 32px;
+        }
+
+        .password-input-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 16px 20px;
+            padding-right: 50px;
+            background: rgba(10, 10, 15, 0.6);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--fg);
+            font-size: 1.1rem;
+            letter-spacing: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(201, 168, 108, 0.2);
+        }
+
+        .password-input::placeholder {
+            letter-spacing: 2px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: var(--accent);
+        }
+
+        .enter-btn {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border: none;
+            border-radius: 12px;
+            color: var(--bg);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enter-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+
+        .enter-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .enter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(201, 168, 108, 0.4);
+        }
+
+        .enter-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .error-msg.show {
+            opacity: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .main-content.active {
+            display: block;
+            animation: mainEntrance 1s ease-out;
+        }
+
+        @keyframes mainEntrance {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Navigation */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            padding: 16px 24px;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--fg);
+            background: rgba(201, 168, 108, 0.1);
+            border-color: var(--border);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 20% 30%, rgba(92, 26, 26, 0.4) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(201, 168, 108, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(139, 38, 53, 0.2) 0%, transparent 70%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 24px;
+            background: rgba(201, 168, 108, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            color: var(--accent);
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-message {
+            font-size: 1.2rem;
+            color: var(--muted);
+            line-height: 1.8;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.6s backwards;
+        }
+
+        .btn-primary {
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border: none;
+            border-radius: 12px;
+            color: var(--bg);
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(201, 168, 108, 0.4);
+        }
+
+        .btn-secondary {
+            padding: 16px 40px;
+            background: transparent;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--fg);
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(201, 168, 108, 0.1);
+            border-color: var(--accent);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Floating Hearts */
+        .hearts-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.15;
+            animation: heartFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes heartFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-100px) rotate(180deg);
+            }
+        }
+
+        /* Sections */
+        .section {
+            padding: 100px 24px;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--muted);
+            margin-bottom: 60px;
+        }
+
+        /* AI Curhat Section */
+        .ai-section {
+            background: linear-gradient(180deg, transparent, rgba(92, 26, 26, 0.2), transparent);
+        }
+
+        .ai-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .ai-chat-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .ai-messages {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+
+        .ai-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .ai-messages::-webkit-scrollbar-track {
+            background: rgba(201, 168, 108, 0.1);
+            border-radius: 3px;
+        }
+
+        .ai-messages::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .message {
+            padding: 14px 20px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            max-width: 85%;
+            animation: messageIn 0.3s ease-out;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, var(--burgundy), var(--deep-red));
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai {
+            background: rgba(201, 168, 108, 0.15);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .ai-input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        .ai-input {
+            flex: 1;
+            padding: 14px 20px;
+            background: rgba(10, 10, 15, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--fg);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .ai-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .ai-send-btn {
+            padding: 14px 24px;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            color: var(--bg);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ai-send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Gallery Section */
+        .gallery-section {
+            background: linear-gradient(180deg, transparent, rgba(201, 168, 108, 0.05), transparent);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: var(--card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .gallery-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .gallery-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(10, 10, 15, 0.9));
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gallery-card:hover .gallery-overlay {
+            opacity: 1;
+        }
+
+        .gallery-caption {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+
+        .gallery-date {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* Memory Upload */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 40px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent);
+            background: rgba(201, 168, 108, 0.05);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            color: var(--accent);
+        }
+
+        /* Game Section */
+        .game-section {
+            background: linear-gradient(180deg, transparent, rgba(92, 26, 26, 0.15), transparent);
+        }
+
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .memory-game {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .memory-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+
+        .memory-card.flipped .memory-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .memory-card.matched .memory-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .memory-card.matched {
+            pointer-events: none;
+        }
+
+        .card-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, rgba(92, 26, 26, 0.6), rgba(139, 38, 53, 0.6));
+            border: 1px solid var(--border);
+        }
+
+        .card-front::after {
+            content: '?';
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            transform: rotateY(180deg);
+            color: var(--bg);
+            font-size: 2.5rem;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .game-btn {
+            padding: 12px 32px;
+            background: transparent;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--fg);
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .game-btn:hover {
+            background: rgba(201, 168, 108, 0.1);
+            border-color: var(--accent);
+        }
+
+        .game-win {
+            text-align: center;
+            padding: 40px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .game-win h3 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-heart {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .footer-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--muted);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 16px;
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--fg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .login-card {
+                padding: 32px 24px;
+            }
+
+            .game-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+
+            .card-face {
+                font-size: 1.5rem;
+            }
+
+            .card-back {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Lobby Screen -->
+    <div class="lobby-screen" id="lobbyScreen">
+        <div class="lobby-bg">
+            <div class="floating-orb orb-1"></div>
+            <div class="floating-orb orb-2"></div>
+            <div class="floating-orb orb-3"></div>
+            <div class="particle-field" id="particleField"></div>
+        </div>
+
+        <div class="login-card">
+            <h1 class="login-title">Selamat Datang</h1>
+            <p class="login-subtitle">Masukkan kode rahasia untuk melanjutkan</p>
+
+            <div class="password-input-wrapper">
+                <input 
+                    type="password" 
+                    id="passwordInput" 
+                    class="password-input" 
+                    placeholder="KODE RAHASIA"
+                    maxlength="6"
+                    autocomplete="off"
+                >
+                <button class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            </div>
+
+            <button class="enter-btn" id="enterBtn">Masuk</button>
+            <p class="error-msg" id="errorMsg">Kode yang Anda masukkan salah</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Navigation -->
+        <nav class="nav-bar">
+            <div class="nav-logo">Untukmu</div>
+            <div class="nav-links">
+                <button class="nav-link active" data-section="hero">Beranda</button>
+                <button class="nav-link" data-section="ai">Curhat AI</button>
+                <button class="nav-link" data-section="gallery">Kenangan</button>
+                <button class="nav-link" data-section="game">Game</button>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-section" id="hero">
+            <div class="hero-bg"></div>
+            <div class="hearts-container" id="heartsContainer"></div>
+
+            <div class="hero-content">
+                <span class="hero-badge">Dari Hati Terdalam</span>
+                <h1 class="hero-title">
+                    <span class="highlight">Permintaan Maaf</span><br>
+                    Yang Tulus
+                </h1>
+                <p class="hero-message">
+                    Aku tahu kata-kata tak bisa menghapus kesalahan, tapi aku berharap<br>
+                    kamu bisa merasakan penyesalanku yang dalam. Maafkan aku...
+                </p>
+                <div class="hero-actions">
+                    <button class="btn-primary" onclick="scrollToSection('ai')">Mulai Curhat</button>
+                    <button class="btn-secondary" onclick="scrollToSection('gallery')">Lihat Kenangan</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Curhat Section -->
+        <section class="section ai-section" id="ai">
+            <h2 class="section-title">AI Teman Curhat</h2>
+            <p class="section-subtitle">Ceritakan perasaanmu, aku akan mendengarkan dengan sepenuh hati</p>
+
+            <div class="ai-container">
+                <div class="ai-chat-box">
+                    <div class="ai-messages" id="aiMessages">
+                        <div class="message ai">
+                            <div class="message-label">Teman AI</div>
+                            Hai, aku di sini untuk mendengarkan. Ceritakan apa yang kamu rasakan... aku tidak akan menghakimi. Apapun yang terjadi, perasaanmu valid.
+                        </div>
+                    </div>
+                    <div class="ai-input-wrapper">
+                        <input 
+                            type="text" 
+                            class="ai-input" 
+                            id="aiInput" 
+                            placeholder="Ketik pesanmu di sini..."
+                        >
+                        <button class="ai-send-btn" id="aiSendBtn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section class="section gallery-section" id="gallery">
+            <h2 class="section-title">Galeri Kenangan</h2>
+            <p class="section-subtitle">Momen-momen indah yang tak akan pernah aku lupakan</p>
+
+            <div class="upload-zone" id="uploadZone">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p>Tekan untuk menambah kenangan baru</p>
+                <p style="color: var(--muted); font-size: 0.9rem; margin-top: 8px;">PNG, JPG hingga 10MB</p>
+                <input type="file" id="fileInput" accept="image/*" multiple hidden>
+            </div>
+
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </section>
+
+        <!-- Game Section -->
+        <section class="section game-section" id="game">
+            <h2 class="section-title">Memory Game</h2>
+            <p class="section-subtitle">Uji ingatanmu dengan permainan ini</p>
+
+            <div class="game-container">
+                <div class="memory-game" id="memoryGame">
+                    <div class="game-header">
+                        <div class="game-stats">
+                            <div class="stat">
+                                <div class="stat-value" id="moves">0</div>
+                                <div class="stat-label">Langkah</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" id="timer">0:00</div>
+                                <div class="stat-label">Waktu</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" id="matches">0/8</div>
+                                <div class="stat-label">Cocok</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-grid" id="gameGrid"></div>
+                    <div class="game-controls">
+                        <button class="game-btn" id="restartBtn">Mulai Ulang</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-heart">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--accent)">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+            </div>
+            <p class="footer-text">Dengan segala kerendahan hati, aku memohon maaf</p>
+        </footer>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal-overlay" id="imageModal">
+        <button class="modal-close" id="modalClose" aria-label="Close modal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Gallery image">
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION & DATA
+        // ==========================================
+        const SECRET_CODE = '081108';
+
+        const AI_RESPONSES = [
+            "Terima kasih sudah mau berbagi. Aku bisa merasakan betapa beratnya perasaanmu. Kamu tidak sendirian dalam ini.",
+            "Aku mengerti. Kadang kita butuh waktu untuk memproses semuanya. Tidak ada yang salah dengan merasa seperti itu.",
+            "Perasaanmu sangat valid. Setiap orang berhak merasakan apa yang mereka rasakan. Tidak perlu terburu-buru untuk 'move on'.",
+            "Kamu sangat berani sudah mau membicarakannya. Itu langkah pertama yang sangat penting. Aku bangga denganmu.",
+            "Aku di sini untukmu. Ceritakan lebih banyak jika kamu mau, atau kita bisa bicara hal lain jika itu terlalu berat.",
+            "Kadang orang yang kita sayangi justru yang paling bisa menyakiti kita. Tapi itu tidak berarti kamu pantas disakiti.",
+            "Waktu akan membantu, tapi jangan paksa dirimu untuk cepat-cepat. Prosesmu unik dan itu tidak masalah.",
+            "Maaf jika aku tidak bisa memberi solusi, tapi aku bisa menjadi tempatmu mengadu. Kadang didengarkan saja sudah cukup.",
+            "Kamu adalah orang yang berharga. Jangan biarkan satu kesalahan atau satu momen mendefinisikan siapa dirimu.",
+            "Aku percaya ada hikmah di balik semua ini. Mungkin belum terlihat sekarang, tapi suatu saat kamu akan mengerti."
+        ];
+
+        const MEMORY_EMOJIS = ['❤️', '💔', '💖', '💝', '💕', '💗', '💓', '💞'];
+
+        const GALLERY_MEMORIES = [
+            { caption: 'Pertemuan pertama kita', date: 'Tahun lalu' },
+            { caption: 'Senyummu yang terindah', date: 'Kenangan indah' },
+            { caption: 'Momen bahagia bersama', date: 'Tak terlupakan' },
+            { caption: 'Tempat favorit kita', date: 'Special place' },
+            { caption: 'Ketika kita tertawa bersama', date: 'Happy times' },
+            { caption: 'Malam yang tak terlupakan', date: 'Beautiful night' }
+        ];
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        // Initialize variables first
+        let gameCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let gameTimer = null;
+        let gameSeconds = 0;
+        let gameStarted = false;
+
+        // Initialize particles
+        const particleField = document.getElementById('particleField');
+        if (particleField) {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particleField.appendChild(particle);
+            }
+        }
+
+        // Initialize floating hearts
+        const heartsContainer = document.getElementById('heartsContainer');
+        if (heartsContainer) {
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.innerHTML = '❤';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.top = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                heart.style.fontSize = (15 + Math.random() * 20) + 'px';
+                heartsContainer.appendChild(heart);
+            }
+        }
+
+        // ==========================================
+        // LOGIN FUNCTIONALITY
+        // ==========================================
+        const passwordInput = document.getElementById('passwordInput');
+        const enterBtn = document.getElementById('enterBtn');
+        const togglePassword = document.getElementById('togglePassword');
+        const errorMsg = document.getElementById('errorMsg');
+        const lobbyScreen = document.getElementById('lobbyScreen');
+        const mainContent = document.getElementById('mainContent');
+
+        let passwordVisible = false;
+
+        if (togglePassword) {
+            togglePassword.addEventListener('click', () => {
+                passwordVisible = !passwordVisible;
+                passwordInput.type = passwordVisible ? 'text' : 'password';
+            });
+        }
+
+        function attemptLogin() {
+            const code = passwordInput.value;
+            if (code === SECRET_CODE) {
+                errorMsg.classList.remove('show');
+                lobbyScreen.classList.add('hidden');
+                setTimeout(() => {
+                    mainContent.classList.add('active');
+                    initializeGallery();
+                    initializeGame();
+                }, 800);
+            } else {
+                errorMsg.classList.add('show');
+                passwordInput.style.borderColor = '#e74c3c';
+                setTimeout(() => {
+                    passwordInput.style.borderColor = '';
+                }, 1000);
+            }
+        }
+
+        if (enterBtn) {
+            enterBtn.addEventListener('click', attemptLogin);
+        }
+
+        if (passwordInput) {
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    attemptLogin();
+                }
+            });
+        }
+
+        // ==========================================
+        // NAVIGATION
+        // ==========================================
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const sectionId = link.dataset.section;
+                scrollToSection(sectionId);
+
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // ==========================================
+        // AI CHAT FUNCTIONALITY
+        // ==========================================
+        const aiMessages = document.getElementById('aiMessages');
+        const aiInput = document.getElementById('aiInput');
+        const aiSendBtn = document.getElementById('aiSendBtn');
+
+        function getAIResponse() {
+            return AI_RESPONSES[Math.floor(Math.random() * AI_RESPONSES.length)];
+        }
+
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            messageDiv.innerHTML = `
+                <div class="message-label">${isUser ? 'Kamu' : 'Teman AI'}</div>
+                ${text}
+            `;
+            aiMessages.appendChild(messageDiv);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = aiInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            aiInput.value = '';
+
+            // Simulate AI thinking
+            setTimeout(() => {
+                addMessage(getAIResponse(), false);
+            }, 800 + Math.random() * 1000);
+        }
+
+        if (aiSendBtn) {
+            aiSendBtn.addEventListener('click', sendMessage);
+        }
+
+        if (aiInput) {
+            aiInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        // ==========================================
+        // GALLERY FUNCTIONALITY
+        // ==========================================
+        const galleryGrid = document.getElementById('galleryGrid');
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalClose = document.getElementById('modalClose');
+
+        let galleryImages = [];
+
+        function initializeGallery() {
+            // Load default placeholder images
+            GALLERY_MEMORIES.forEach((memory, index) => {
+                addGalleryItem(null, memory.caption, memory.date);
+            });
+        }
+
+        function addGalleryItem(imageSrc, caption, date) {
+            const card = document.createElement('div');
+            card.className = 'gallery-card';
+            card.innerHTML = `
+                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, rgba(92, 26, 26, 0.4), rgba(139, 38, 53, 0.4)); display: flex; align-items: center; justify-content: center;">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                </div>
+                <div class="gallery-overlay">
+                    <div>
+                        <div class="gallery-caption">${caption}</div>
+                        <div class="gallery-date">${date}</div>
+                    </div>
+                </div>
+            `;
+
+            if (imageSrc) {
+                const img = card.querySelector('div');
+                img.innerHTML = '';
+                img.style.background = 'transparent';
+                const imgEl = document.createElement('img');
+                imgEl.src = imageSrc;
+                imgEl.alt = caption;
+                imgEl.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+                card.insertBefore(imgEl, card.firstChild);
+            }
+
+            card.addEventListener('click', () => {
+                if (imageSrc) {
+                    modalImage.src = imageSrc;
+                    imageModal.classList.add('active');
+                }
+            });
+
+            galleryGrid.insertBefore(card, galleryGrid.firstChild);
+        }
+
+        if (uploadZone) {
+            uploadZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.style.borderColor = 'var(--accent)';
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.style.borderColor = '';
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.style.borderColor = '';
+                handleFiles(e.dataTransfer.files);
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        addGalleryItem(e.target.result, 'Kenangan baru', 'Baru ditambahkan');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        if (modalClose) {
+            modalClose.addEventListener('click', () => {
+                imageModal.classList.remove('active');
+            });
+        }
+
+        if (imageModal) {
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal) {
+                    imageModal.classList.remove('active');
+                }
+            });
+        }
+
+        // ==========================================
+        // MEMORY GAME FUNCTIONALITY
+        // ==========================================
+        const gameGrid = document.getElementById('gameGrid');
+        const movesDisplay = document.getElementById('moves');
+        const timerDisplay = document.getElementById('timer');
+        const matchesDisplay = document.getElementById('matches');
+        const restartBtn = document.getElementById('restartBtn');
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function initializeGame() {
+            // Reset state
+            gameCards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            gameSeconds = 0;
+            gameStarted = false;
+
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+
+            if (movesDisplay) movesDisplay.textContent = '0';
+            if (timerDisplay) timerDisplay.textContent = '0:00';
+            if (matchesDisplay) matchesDisplay.textContent = '0/8';
+
+            // Create pairs
+            const emojis = shuffleArray([...MEMORY_EMOJIS, ...MEMORY_EMOJIS]);
+
+            if (gameGrid) {
+                gameGrid.innerHTML = '';
+
+                emojis.forEach((emoji, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'memory-card';
+                    card.dataset.emoji = emoji;
+                    card.dataset.index = index;
+                    card.innerHTML = `
+                        <div class="memory-card-inner">
+                            <div class="card-face card-front"></div>
+                            <div class="card-face card-back">${emoji}</div>
+                        </div>
+                    `;
+
+                    card.addEventListener('click', () => flipCard(card));
+                    gameGrid.appendChild(card);
+                    gameCards.push(card);
+                });
+            }
+        }
+
+        function flipCard(card) {
+            if (
+                card.classList.contains('flipped') ||
+                card.classList.contains('matched') ||
+                flippedCards.length >= 2
+            ) {
+                return;
+            }
+
+            if (!gameStarted) {
+                gameStarted = true;
+                startTimer();
+            }
+
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                if (movesDisplay) movesDisplay.textContent = moves;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const match = card1.dataset.emoji === card2.dataset.emoji;
+
+            if (match) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedPairs++;
+                if (matchesDisplay) matchesDisplay.textContent = `${matchedPairs}/8`;
+                flippedCards = [];
+
+                if (matchedPairs === 8) {
+                    endGame();
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        function startTimer() {
+            gameTimer = setInterval(() => {
+                gameSeconds++;
+                const mins = Math.floor(gameSeconds / 60);
+                const secs = gameSeconds % 60;
+                if (timerDisplay) {
+                    timerDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+
+            setTimeout(() => {
+                if (gameGrid) {
+                    gameGrid.innerHTML = `
+                        <div class="game-win" style="grid-column: span 4;">
+                            <h3>Selamat!</h3>
+                            <p style="color: var(--muted); margin-bottom: 24px;">
+                                Kamu menyelesaikan game dalam ${moves} langkah dan ${timerDisplay ? timerDisplay.textContent : '0:00'}
+                            </p>
+                            <button class="btn-primary" onclick="initializeGame()">Main Lagi</button>
+                        </div>
+                    `;
+                }
+            }, 500);
+        }
+
+        if (restartBtn) {
+            restartBtn.addEventListener('click', initializeGame);
+        }
+
+        // ==========================================
+        // SCROLL ANIMATIONS
+        // ==========================================
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // ==========================================
+        // KEYBOARD NAVIGATION
+        // ==========================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && imageModal && imageModal.classList.contains('active')) {
+                imageModal.classList.remove('active');
+            }
+        });
+
+        // ==========================================
+        // NAVIGATION SCROLL SPY
+        // ==========================================
+        const sections = document.querySelectorAll('.section, .hero-section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.section === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
